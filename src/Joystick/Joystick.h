@@ -234,6 +234,7 @@ protected:
 
     void    _pitchStep              (int direction);
     void    _yawStep                (int direction);
+    void    _throttleBtnStep        (int direction);
     double  _localYaw       = 0.0;
     double  _localPitch     = 0.0;
 
@@ -352,6 +353,12 @@ private:
     static const char* _buttonActionGimbalRight;
     static const char* _buttonActionGimbalCenter;
     static const char* _buttonActionEmergencyStop;
+    static const char* _buttonActionThrottleUp;
+    static const char* _buttonActionThrottleDown;
+    static const char* _buttonActionThrottleMiddle;
+    static const char* _buttonActionThrottleZero;
+
+    float throttleButtnPct = 0;
 
 private slots:
     void _activeVehicleChanged(Vehicle* activeVehicle);
