@@ -367,6 +367,8 @@ private:
     static const char* _buttonActionThrottleDown;
     static const char* _buttonActionThrottleMiddle;
     static const char* _buttonActionThrottleZero;
+    static const char* _buttonActionToggleCamera;
+    static const char* _buttonActionToggleNavAlg;
 
     float throttleButtnPct = 0;
 
