@@ -67,6 +67,10 @@ const char* Joystick::_buttonActionGimbalCenter =       QT_TR_NOOP("Gimbal Cente
 const char* Joystick::_buttonActionEmergencyStop =      QT_TR_NOOP("Emergency Stop");
 const char* Joystick::_buttonActionGripperGrab =        QT_TR_NOOP("Gripper Close");
 const char* Joystick::_buttonActionGripperRelease =     QT_TR_NOOP("Gripper Open");
+const char* Joystick::_buttonActionThrottleUp     =     QT_TR_NOOP("Throttle Inc");
+const char* Joystick::_buttonActionThrottleDown   =     QT_TR_NOOP("Throttle Dec");
+const char* Joystick::_buttonActionThrottleMiddle =     QT_TR_NOOP("Throttle Middle");
+const char* Joystick::_buttonActionThrottleZero   =     QT_TR_NOOP("Throttle Zero");
 
 const char* Joystick::_rgFunctionSettingsKey[Joystick::maxFunction] = {
     "RollAxis",
@@ -682,6 +686,9 @@ void Joystick::_handleAxis()
                     buttonPressedBits |= buttonBit;
                 }
             }
+
+            yaw = 0;
+            throttle = throttleButtnPct;
             emit axisValues(roll, pitch, yaw, throttle);
 
             uint16_t shortButtons = static_cast<uint16_t>(buttonPressedBits & 0xFFFF);
@@ -1044,6 +1051,22 @@ void Joystick::_executeButtonAction(const QString& action, bool buttonDown)
         if(buttonDown) {
             emit gripperAction(GRIPPER_ACTION_RELEASE);
         }
+    } else if (action == _buttonActionThrottleUp) {
+        if(buttonDown) {
+            _throttleBtnStep(1);
+        }
+    } else if (action == _buttonActionThrottleDown) {
+        if(buttonDown) {
+            _throttleBtnStep(-1);
+        }
+    } else if (action == _buttonActionThrottleMiddle) {
+        if(buttonDown) {
+            _throttleBtnStep(0);
+        }
+    } else if (action == _buttonActionThrottleZero) {
+        if(buttonDown) {
+            _throttleBtnStep(2);
+        }
     } else {
         if (buttonDown && _activeVehicle) {
             for (auto& item : _customMavCommands) {
@@ -1071,6 +1094,33 @@ void Joystick::_yawStep(int direction)
     if(_localYaw < -180.0) _localYaw = -180.0;
     if(_localYaw >  180.0) _localYaw =  180.0;
     emit gimbalControlValue(_localPitch, _localYaw);
+}
+
+void Joystick::_throttleBtnStep(int direction)
+{
+    if (0 == direction) {
+        this->throttleButtnPct = 0.5f;
+    }
+
+    if (1 == direction) {
+        if (this->throttleButtnPct < 1.f) {
+            this->throttleButtnPct += 0.1f;
+        } else {
+            this->throttleButtnPct = 1.f;
+        }
+    }
+
+    if (-1 == direction) {
+        if (this->throttleButtnPct > 0.f) {
+            this->throttleButtnPct -= 0.1f;
+        } else {
+            this->throttleButtnPct = 0.f;
+        }
+    }
+
+    if (2 == direction) {
+        this->throttleButtnPct = 0.f;
+    }
 }
 
 bool Joystick::_validAxis(int axis) const
@@ -1142,6 +1192,10 @@ void Joystick::_buildActionList(Vehicle* activeVehicle)
     _assignableButtonActions.append(new AssignableButtonAction(this, _buttonActionEmergencyStop));
     _assignableButtonActions.append(new AssignableButtonAction(this, _buttonActionGripperGrab));
     _assignableButtonActions.append(new AssignableButtonAction(this, _buttonActionGripperRelease));
+    _assignableButtonActions.append(new AssignableButtonAction(this, _buttonActionThrottleUp,    true));
+    _assignableButtonActions.append(new AssignableButtonAction(this, _buttonActionThrottleDown,  true));
+    _assignableButtonActions.append(new AssignableButtonAction(this, _buttonActionThrottleMiddle));
+    _assignableButtonActions.append(new AssignableButtonAction(this, _buttonActionThrottleZero));
 
     for (auto& item : _customMavCommands) {
         _assignableButtonActions.append(new AssignableButtonAction(this, item.name()));
