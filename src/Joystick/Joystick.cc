@@ -71,6 +71,8 @@ const char* Joystick::_buttonActionThrottleUp     =     QT_TR_NOOP("Throttle Inc
 const char* Joystick::_buttonActionThrottleDown   =     QT_TR_NOOP("Throttle Dec");
 const char* Joystick::_buttonActionThrottleMiddle =     QT_TR_NOOP("Throttle Middle");
 const char* Joystick::_buttonActionThrottleZero   =     QT_TR_NOOP("Throttle Zero");
+const char* Joystick::_buttonActionToggleCamera   =     QT_TR_NOOP("Toggle Camera");
+const char* Joystick::_buttonActionToggleNavAlg   =     QT_TR_NOOP("Toggle NavAlg");
 
 const char* Joystick::_rgFunctionSettingsKey[Joystick::maxFunction] = {
     "RollAxis",
@@ -1067,6 +1069,20 @@ void Joystick::_executeButtonAction(const QString& action, bool buttonDown)
         if(buttonDown) {
             _throttleBtnStep(2);
         }
+    } else if (action == _buttonActionToggleCamera) {
+        if (buttonDown && _activeVehicle) {
+            _activeVehicle->sendMavCommand(
+                _activeVehicle->defaultComponentId(),
+                static_cast<MAV_CMD>(MAV_CMD_DO_SET_RELAY), true, 0, 3, 0, 0,
+                0, 0, 0);
+        }
+    } else if (action == _buttonActionToggleNavAlg) {
+        if (buttonDown && _activeVehicle) {
+            _activeVehicle->sendMavCommand(
+                _activeVehicle->defaultComponentId(),
+                static_cast<MAV_CMD>(MAV_CMD_DO_SET_RELAY), true, 0, 10, 0, 0,
+                0, 0, 0);
+        }
     } else {
         if (buttonDown && _activeVehicle) {
             for (auto& item : _customMavCommands) {
@@ -1103,7 +1119,7 @@ void Joystick::_throttleBtnStep(int direction)
     }
 
     if (1 == direction) {
-        if (this->throttleButtnPct < 1.f) {
+        if (this->throttleButtnPct <= 0.9f) {
             this->throttleButtnPct += 0.1f;
         } else {
             this->throttleButtnPct = 1.f;
@@ -1111,7 +1127,7 @@ void Joystick::_throttleBtnStep(int direction)
     }
 
     if (-1 == direction) {
-        if (this->throttleButtnPct > 0.f) {
+        if (this->throttleButtnPct >= 0.1f) {
             this->throttleButtnPct -= 0.1f;
         } else {
             this->throttleButtnPct = 0.f;
@@ -1196,6 +1212,8 @@ void Joystick::_buildActionList(Vehicle* activeVehicle)
     _assignableButtonActions.append(new AssignableButtonAction(this, _buttonActionThrottleDown,  true));
     _assignableButtonActions.append(new AssignableButtonAction(this, _buttonActionThrottleMiddle));
     _assignableButtonActions.append(new AssignableButtonAction(this, _buttonActionThrottleZero));
+    _assignableButtonActions.append(new AssignableButtonAction(this, _buttonActionToggleCamera));
+    _assignableButtonActions.append(new AssignableButtonAction(this, _buttonActionToggleNavAlg));
 
     for (auto& item : _customMavCommands) {
         _assignableButtonActions.append(new AssignableButtonAction(this, item.name()));
