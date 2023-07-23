@@ -1119,16 +1119,16 @@ void Joystick::_throttleBtnStep(int direction)
     }
 
     if (1 == direction) {
-        if (this->throttleButtnPct <= 0.9f) {
-            this->throttleButtnPct += 0.1f;
+        if (this->throttleButtnPct <= 0.95f) {
+            this->throttleButtnPct += 0.05f;
         } else {
             this->throttleButtnPct = 1.f;
         }
     }
 
     if (-1 == direction) {
-        if (this->throttleButtnPct >= 0.1f) {
-            this->throttleButtnPct -= 0.1f;
+        if (this->throttleButtnPct >= 0.05f) {
+            this->throttleButtnPct -= 0.05f;
         } else {
             this->throttleButtnPct = 0.f;
         }
